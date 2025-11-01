@@ -32,3 +32,6 @@ fastembed>=0.5.0
 pillow>=10.0.0
 chromadb>=0.4.0
 sentence-transformers>=2.2.0
+validators>=0.34.0
+sqlalchemy>=2.0.0
+pydantic>=2.0.0
