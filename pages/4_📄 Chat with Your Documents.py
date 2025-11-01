@@ -415,7 +415,7 @@ import tempfile
 import streamlit as st
 import utils
 from streaming import StreamHandler
-from langchain.memory import ConversationBufferMemory
+from langchain.memory.buffer import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import DocArrayInMemorySearch

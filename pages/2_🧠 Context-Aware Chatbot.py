@@ -2,7 +2,7 @@ import utils
 import streamlit as st
 from streaming import StreamHandler
 
-from langchain.chains import ConversationChain
+from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
 # -------------------- Page Config --------------------
