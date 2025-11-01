@@ -13,6 +13,15 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import DocArrayInMemorySearch
 
 
+# -------------------- Cache Management --------------------
+# Clear any residual OpenAI sessions when starting
+if "openai_api_key_input" in st.session_state:
+    del st.session_state["openai_api_key_input"]
+
+# Set default to Ollama if not set
+if "llm_provider_selection" not in st.session_state:
+    st.session_state.llm_provider_selection = "Ollama (Local)"
+
 # --------------------------- #
 # 🌑 Streamlit Page Settings
 # --------------------------- #

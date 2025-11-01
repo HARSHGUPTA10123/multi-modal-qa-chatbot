@@ -9,6 +9,15 @@ from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.utilities.sql_database import SQLDatabase
 
+# -------------------- Cache Management --------------------
+# Clear any residual OpenAI sessions when starting
+if "openai_api_key_input" in st.session_state:
+    del st.session_state["openai_api_key_input"]
+
+# Set default to Ollama if not set
+if "llm_provider_selection" not in st.session_state:
+    st.session_state.llm_provider_selection = "Ollama (Local)"
+
 # -------------------- Page Setup --------------------
 st.set_page_config(page_title="ChatSQL", page_icon="🛢", layout="wide")
 
