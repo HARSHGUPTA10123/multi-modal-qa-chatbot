@@ -1,4 +1,3 @@
-Here's the complete README.md file ready to copy and paste:
 
 ```markdown
 # 🤖 Multi-Modal Q&A Chatbot
