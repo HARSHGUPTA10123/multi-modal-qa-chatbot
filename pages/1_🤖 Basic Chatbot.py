@@ -13,9 +13,7 @@ from langchain.chains import LLMChain
 if "openai_api_key_input" in st.session_state:
     del st.session_state["openai_api_key_input"]
 
-# Set default to Ollama if not set
-if "llm_provider_selection" not in st.session_state:
-    st.session_state.llm_provider_selection = "Ollama (Local)"
+utils.set_default_openai()
 
 # ---------- Page Configuration ----------
 st.set_page_config(page_title="Chatbot 💬", page_icon="💬", layout="wide")

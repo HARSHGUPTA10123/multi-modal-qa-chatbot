@@ -14,8 +14,13 @@ logger = logging.getLogger('Langchain-Chatbot')
 
 def clear_llm_cache_on_provider_change():
     """Clear LLM cache when user switches between OpenAI and Ollama"""
+    # Always initialize with OpenAI as default
     if "previous_llm_provider" not in st.session_state:
-        st.session_state.previous_llm_provider = None
+        st.session_state.previous_llm_provider = "OpenAI (Cloud - Recommended)"
+
+    if "llm_provider_selection" not in st.session_state:
+        st.session_state.llm_provider_selection = "OpenAI (Cloud - Recommended)"
+
     
     current_provider = st.session_state.get("llm_provider_selection", None)
     previous_provider = st.session_state.previous_llm_provider
@@ -23,7 +28,7 @@ def clear_llm_cache_on_provider_change():
     # If provider changed, clear relevant caches
     if current_provider != previous_provider:
         # Clear API key inputs when switching away from OpenAI
-        if previous_provider == "OpenAI (Cloud - Recommended)":
+        if previous_provider == "OpenAI (Cloud - Recommended)":  # FIXED: Match the exact option
             keys_to_clear = ["openai_api_key_input", "openai_model_selection", "openai_temperature"]
             for key in keys_to_clear:
                 if key in st.session_state:
@@ -41,6 +46,12 @@ def sync_st_session():
     This is a placeholder function that can be used for session synchronization.
     """
     pass
+
+
+def set_default_openai():
+    """Always reset default provider to OpenAI when a new page loads."""
+    st.session_state.llm_provider_selection = "OpenAI (Cloud - Recommended)"
+
 
 # decorator
 def enable_chat_history(func):
@@ -215,8 +226,8 @@ def configure_llm():
     # LLM type selection
     llm_type = st.sidebar.radio(
         label="Select AI Provider",
-        options=["OpenAI (Cloud - Recommended)", "Ollama (Local)"],
-        index=1,  # Default to Ollama since OpenAI has quota issues
+        options=["OpenAI (Cloud - Recommended)", "Ollama (Local)"],  # FIXED: Added the labels back
+        index=0,  
         help="Choose between cloud-based OpenAI or local Ollama",
         key="llm_provider_selection"
     )
@@ -226,7 +237,7 @@ def configure_llm():
         st.session_state.last_provider = llm_type
         st.rerun()  # This ensures clean state
     
-    if llm_type == "OpenAI (Cloud - Recommended)":
+    if llm_type == "OpenAI (Cloud - Recommended)":  # FIXED: Match the exact option
         llm = configure_openai_llm()
         if llm is None:
             st.sidebar.info("🔑 Enter your OpenAI API key above to start chatting")
@@ -251,3 +262,128 @@ def add_clear_button():
     st.sidebar.markdown("---")
     if st.sidebar.button("🗑️ Clear Chat History", use_container_width=True):
         clear_chat_history()
+        
+        
+# -------------------- Internet Chat LLM Config --------------------
+import streamlit as st
+from tavily import TavilyClient
+def configure_llm_internet():
+    """
+    Configures the LLM (OpenAI or Ollama) specifically for the Internet Chat page.
+    Returns: (llm, tavily_client)
+    """
+    # Use separate session state keys for Internet chatbot
+    if "internet_llm_provider_selection" not in st.session_state:
+        st.session_state.internet_llm_provider_selection = "OpenAI"
+
+    with st.sidebar:
+        st.header("⚙️ Model Configuration")
+
+        # Let user choose the LLM provider - use separate key
+        st.session_state.internet_llm_provider_selection = st.selectbox(
+            "Select LLM Provider:",
+            ["OpenAI", "Ollama"],
+            index=0 if st.session_state.internet_llm_provider_selection == "OpenAI" else 1,
+            key="internet_llm_provider_selectbox"  # Unique key
+        )
+
+        # OpenAI Configuration - SIMPLE (only API key)
+        if st.session_state.internet_llm_provider_selection == "OpenAI":
+            openai_api_key = st.text_input(
+                "🔑 Enter OpenAI API Key:",
+                key="internet_openai_api_key_input",  # Unique key
+                type="password",
+                placeholder="sk-...",
+            )
+            st.info("Using **OpenAI API** — Internet access handled automatically.", icon="💡")
+            
+            if not openai_api_key:
+                st.error("⚠️ Please enter your OpenAI API Key.")
+                st.stop()
+            
+            llm = configure_openai_direct(openai_api_key)
+            tavily_client = TavilyClient(api_key=st.secrets.get("TAVILY_API_KEY", ""))
+            return llm, tavily_client
+
+        # Ollama Configuration - WITH MODEL SELECTION
+        else:
+            st.markdown("---")
+            st.subheader("🦙 Ollama Configuration")
+            
+            # Model selection with recommended tag - use unique keys
+            ollama_models = ["tinyllama (Recommended)", "llama2", "mistral", "codellama"]
+            selected_ollama_model = st.selectbox(
+                label="Ollama Model",
+                options=ollama_models,
+                index=0,
+                help="Only 'tinyllama' is installed. Other models will show errors for demonstration",
+                key="internet_ollama_model_selection"  # Unique key
+            )
+            
+            # Remove the "(Recommended)" tag for processing
+            model_name = selected_ollama_model.replace(" (Recommended)", "").strip()
+            
+            # Temperature control - use unique key
+            ollama_temperature = st.slider(
+                "Creativity Level (Temperature)",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.7,
+                help="0.0 = Precise, 0.7 = Balanced, 1.0 = Creative",
+                key="internet_ollama_temperature"  # Unique key
+            )
+            
+            # Tavily API Key - use unique key
+            tavily_key = st.text_input(
+                "🌐 Enter Tavily API Key:",
+                key="internet_tavily_api_key_input",  # Unique key
+                type="password",
+                placeholder="tvly-...",
+            )
+            st.info("Using **Ollama (Local)** — Tavily API Key required for web access.", icon="⚙️")
+            
+            if not tavily_key:
+                st.error("⚠️ Please enter your Tavily API Key to enable internet access.")
+                st.stop()
+            
+            # Check if the selected model is available
+            if model_name != "tinyllama":
+                st.error(f"❌ '{model_name}' model is not pulled or installed locally.")
+                st.info(f"💡 Kindly use 'tinyllama (Recommended)' or run: `ollama pull {model_name}`")
+                st.stop()
+            
+            llm = configure_ollama_direct(model_name, ollama_temperature)
+            tavily_client = TavilyClient(api_key=tavily_key)
+            return llm, tavily_client
+
+def configure_openai_direct(api_key):
+    """Configure OpenAI directly without sidebar elements"""
+    try:
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model="gpt-3.5-turbo",
+            api_key=api_key,
+            temperature=0.7,
+            streaming=True
+        )
+    except Exception as e:
+        st.error(f"❌ Error initializing OpenAI: {e}")
+        st.stop()
+
+def configure_ollama_direct(model_name="tinyllama", temperature=0.7):
+    """Configure Ollama directly with model selection"""
+    try:
+        from langchain_community.chat_models import ChatOllama
+        return ChatOllama(
+            model=model_name,
+            temperature=temperature,
+            base_url="http://localhost:11434",
+            
+        )
+    except Exception as e:
+        st.error(f"❌ Error initializing Ollama: {e}")
+        st.error("Make sure Ollama is running on http://localhost:11434")
+        st.stop()
+
+
+
