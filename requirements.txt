@@ -14,3 +14,4 @@ fastembed==0.4.2
 pydantic==2.10.6
 SQLAlchemy==2.0.36
 validators==0.34.0
+docarray>=0.32.1 

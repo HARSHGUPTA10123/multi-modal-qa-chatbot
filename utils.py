@@ -47,13 +47,16 @@ def sync_st_session():
     """
     pass
 
-
 def set_default_openai():
-    """Always reset default provider to OpenAI when a new page loads."""
-    st.session_state.llm_provider_selection = "OpenAI (Cloud - Recommended)"
+    """
+    Set OpenAI as default provider only if no provider has been selected yet.
+    Prevents overwriting user's choice on every rerun.
+    """
+    if "llm_provider_selection" not in st.session_state:
+        st.session_state.llm_provider_selection = "OpenAI (Cloud - Recommended)"
 
 
-# decorator
+#decorator
 def enable_chat_history(func):
     # to clear chat history after switching chatbot
     current_page = func.__qualname__
@@ -70,11 +73,14 @@ def enable_chat_history(func):
     # to show chat history on ui
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "assistant", "content": "Hey! 🤖 Ready for some AI magic? Ask me anything! ✨"}]
+    
+    # Display chat messages
     for msg in st.session_state["messages"]:
         st.chat_message(msg["role"]).write(msg["content"])
 
     def execute(*args, **kwargs):
-        func(*args, **kwargs)
+
+        return func(*args, **kwargs)
     return execute
 
 def display_msg(msg, author):
@@ -232,10 +238,6 @@ def configure_llm():
         key="llm_provider_selection"
     )
     
-    # Force refresh when provider changes
-    if st.session_state.get("last_provider") != llm_type:
-        st.session_state.last_provider = llm_type
-        st.rerun()  # This ensures clean state
     
     if llm_type == "OpenAI (Cloud - Recommended)":  # FIXED: Match the exact option
         llm = configure_openai_llm()
@@ -275,6 +277,10 @@ def configure_llm_internet():
     # Use separate session state keys for Internet chatbot
     if "internet_llm_provider_selection" not in st.session_state:
         st.session_state.internet_llm_provider_selection = "OpenAI"
+    else:
+        # keep the current selection persistent across reruns
+        pass
+
 
     with st.sidebar:
         st.header("⚙️ Model Configuration")
