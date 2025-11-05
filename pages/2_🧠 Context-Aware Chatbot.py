@@ -1,15 +1,8 @@
 import utils
 import streamlit as st
 from streaming import StreamHandler
-
 from langchain.chains.conversation.base import ConversationChain
 from langchain.memory import ConversationBufferMemory
-
-
-# -------------------- Cache Management --------------------
-# Clear any residual OpenAI sessions when starting
-if "openai_api_key_input" in st.session_state:
-    del st.session_state["openai_api_key_input"]
 
 utils.set_default_openai()
 
@@ -68,13 +61,12 @@ st.markdown("""
         from {opacity: 0; transform: translateY(15px);}
         to {opacity: 1; transform: translateY(0);}
     }
-
     </style>
 """, unsafe_allow_html=True)
 
 # -------------------- Header --------------------
 st.markdown("<h1 class='title'>⭐ Context Aware Chatbot</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Enhancing Chatbot Interactions through Context Awareness</p>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Remembers previous conversations and maintains context</p>", unsafe_allow_html=True)
 
 # -------------------- Chat Container --------------------
 with st.container():
@@ -94,7 +86,7 @@ with st.container():
         @utils.enable_chat_history
         def main(self):
             chain = self.setup_chain()
-            user_query = st.chat_input(placeholder="Ask me anything! 💬")
+            user_query = st.chat_input(placeholder="Ask me anything! I remember our conversation 💬")
             if user_query:
                 utils.display_msg(user_query, 'user')
                 with st.chat_message("assistant"):

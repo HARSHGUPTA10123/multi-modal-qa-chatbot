@@ -9,10 +9,7 @@ from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.utilities.sql_database import SQLDatabase
 
-# -------------------- Cache Management --------------------
-# Clear any residual OpenAI sessions when starting
-if "openai_api_key_input" in st.session_state:
-    del st.session_state["openai_api_key_input"]
+
 
 utils.set_default_openai()
 

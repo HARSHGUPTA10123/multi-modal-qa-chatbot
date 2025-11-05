@@ -40,4 +40,4 @@ logs/
 *.sqlite3
 
 # Ollama models (optional)
-.ollama/
+.ollama/chatbot_env/

@@ -3,6 +3,7 @@ langchain==0.3.13
 langchain-community==0.3.13
 langchain-core==0.3.28
 langchain-openai==0.2.14
+langchain-ollama==0.2.0
 langchain-text-splitters==0.3.4
 langchainhub==0.1.21
 openai==1.58.1
@@ -14,4 +15,4 @@ fastembed==0.4.2
 pydantic==2.10.6
 SQLAlchemy==2.0.36
 validators==0.34.0
-docarray>=0.32.1 
+docarray>=0.32.1

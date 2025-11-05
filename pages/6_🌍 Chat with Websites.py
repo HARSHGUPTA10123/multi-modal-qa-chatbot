@@ -13,10 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import DocArrayInMemorySearch
 
 
-# -------------------- Cache Management --------------------
-# Clear any residual OpenAI sessions when starting
-if "openai_api_key_input" in st.session_state:
-    del st.session_state["openai_api_key_input"]
+
 
 utils.set_default_openai()
 

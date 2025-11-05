@@ -11,10 +11,6 @@ from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-# -------------------- Cache Management --------------------
-# Clear any residual OpenAI sessions when starting
-if "openai_api_key_input" in st.session_state:
-    del st.session_state["openai_api_key_input"]
 
 utils.set_default_openai()
 
